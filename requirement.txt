@@ -1,6 +1,7 @@
 fastapi
-uvicorn[standard]
-pydantic
+uvicorn
 numpy
 pandas
 Thermobar
+pydantic
+pytest

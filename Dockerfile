@@ -18,3 +18,7 @@ EXPOSE 8000
 
 # Lancer le serveur Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Executer les tests
+#(déconseillé) Décommenter si et seulement si l'on souhaite ne pas faire les tests manuellement
+# CMD ["pytest", "tests/"]
