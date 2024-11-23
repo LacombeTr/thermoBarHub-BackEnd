@@ -1,10 +1,17 @@
 from fastapi import FastAPI
-from typing import List, Dict
+from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import pandas as pd
-import thermobar
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
@@ -16,3 +23,7 @@ def calculate():
     data = np.array([1, 2, 3, 4])
     df = pd.DataFrame(data, columns=["Numbers"])
     return {"dataframe": df.to_dict()}
+
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=8080)

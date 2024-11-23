@@ -1,6 +1,12 @@
 # Utiliser l'image Python officielle
 FROM python:3.13-slim
 
+# Installer les outils nécessaires
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 # Définir le répertoire de travail
 WORKDIR /app
 
