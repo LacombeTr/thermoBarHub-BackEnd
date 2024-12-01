@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
 import json
 import pandas as pd
 import Thermobar as TB
 
-from utils.utils import rename_duplicate_columns
-from services.calculations_service import function_constructor
-from utils.models import calculationRequest, calculationResponse
+from app.services.calculations_service import argument_constructor
+from app.utils.utils import rename_duplicate_columns
+from app.services.calculations_service import function_constructor
+from app.utils.models import calculationRequest, calculationResponse
 
 # Create an instance of the app
 appCalculationThermobar = FastAPI()
@@ -56,13 +55,17 @@ async def calculate(request: calculationRequest):
     # Creating the function name and the arguments for the different cases ___________________________________
 
     function_name = function_constructor(userData.iterative,
+                                         userData.equationP,
+                                         userData.equationT,
+                                         userData.phaseConcat)
+
+    arguments = argument_constructor(userData.iterative,
                                          userData.tDependant,
                                          userData.pDependant,
                                          userData.h2oDependant,
                                          userData.equationP,
                                          userData.equationT,
                                          phaseArg,
-                                         phaseConcat,
                                          userData.temperature,
                                          userData.pressure,
                                          userData.h2o)
