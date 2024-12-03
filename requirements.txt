@@ -5,3 +5,4 @@ pandas
 Thermobar
 pydantic
 pytest
+pdoc
