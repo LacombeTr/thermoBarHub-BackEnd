@@ -24,21 +24,21 @@ def function_constructor(iterative, equationP, equationT, phaseConcat):
     elif equationP is not None : # Case to calculate P
 
         # Construct the name of the fonction using the phases provided by the userData object
-        functionName = f'calculate{phaseConcat}_press, '
+        functionName = f'calculate{phaseConcat}_press'
 
         return functionName
 
     elif equationT is not None : # Case to calculate T
 
         # Construct the name of the fonction using the phases provided by the userData object
-        functionName = f'calculate{phaseConcat}_temp, '
+        functionName = f'calculate{phaseConcat}_temp'
 
         return functionName
 
     else :
 
-        # if no equation is passed (SHOULD NOT HAPPEN) the system shutdown
-        print(f"No equation passed shutting down")
+        # if no equation is passed the system shutdown
+        return "No equation passed, shutting down"
 
 def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equationP, equationT, phaseArg, temperature, pressure, h2o):
     """
@@ -63,11 +63,22 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
 
     if iterative:
 
-        # Construction of the arguments of the function and function call (arg)
-        eqArg = f'equationP="{equationP}", equationT="{equationT}", '
-        arguments = phaseArg + eqArg + 'eq_tests=True'
+        if equationP is not None and equationT is not None :
+            # Construction of the arguments of the function and function call (arg)
+            eqArg = f'equationP="{equationP}", equationT="{equationT}", '
 
-        return arguments
+            if h2oDependant:  # If the equation is water content dependant the water content argument is added
+                h2oArg = f'H2O_Liq = {h2o}, '
+            else:
+                h2oArg = ''
+
+            arguments = phaseArg + eqArg + h2oArg + 'eq_tests=True'
+
+            return arguments
+
+        else:
+
+            return "No equation passed shutting down"
 
     elif equationP is not None : # Case to calculate P
 
@@ -75,9 +86,13 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
 
         if tDependant: # If the equation is temperature dependant the temperature argument is added
             tempArg = f'T = {temperature}, '
+        else:
+            tempArg = ''
 
         if h2oDependant: # If the equation is water content dependant the water content argument is added
             h2oArg = f'H2O_Liq = {h2o}, '
+        else:
+            h2oArg = ''
 
         # Construction of the arguments of the function and function call (arg)
         arguments = phaseArg + eqArg + tempArg + h2oArg + 'eq_tests=True'
@@ -89,10 +104,14 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
         eqArg = f'equationT="{equationT}", '
 
         if pDependant: # If the equation is temperature dependant the temperature argument is added
-            pressArg = f'P = {pressure} ,'
+            pressArg = f'P = {pressure}, '
+        else:
+            pressArg = ''
 
         if h2oDependant: # If the equation is water content dependant the water content argument is added
-            h2oArg = f'H2O_Liq = {h2o} ,'
+            h2oArg = f'H2O_Liq = {h2o}, '
+        else:
+            h2oArg = ''
 
         # Construction of the arguments of the function and function call (arg)
         arguments = phaseArg + eqArg + pressArg + h2oArg + 'eq_tests=True'
@@ -101,4 +120,4 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
 
     else :
         # if no equation is passed (SHOULD NOT HAPPEN) the system shutdown
-        print(f"No equation passed shutting down")
+        return "No equation passed shutting down"

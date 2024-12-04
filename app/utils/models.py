@@ -27,7 +27,9 @@ class calculationRequest(BaseModel):
 
 
 class calculationResponse(BaseModel):
-    """Calculation response model correspond to what the Back-End send back to the Front-End """
+    """
+    Calculation response model correspond to what the Back-End send back to the Front-End
+    """
 
     phases: List[str]
     data: str
