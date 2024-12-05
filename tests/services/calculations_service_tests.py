@@ -1,6 +1,18 @@
 import pytest
 from app.services.calculations_service import *
 
+def test_phase_concatenate_single_phase_returns_phase_only():
+    assert phase_concatenate(["Cpx"]) == "_cpx_only"
+
+def test_phase_concatenate_multiple_phases_returns_phase1_phase2():
+    assert phase_concatenate(["Cpx", "Opx"]) == "_cpx_opx"
+
+def test_phase_arg_constructor_single_phases():
+    assert phase_arg_constructor(["Cpx"]) == "cpx_comps = compo_cpx, "
+
+def test_phase_arg_constructor_multiple_phases():
+    assert phase_arg_constructor(["Cpx", "Opx"]) == "cpx_comps = compo_cpx, opx_comps = compo_opx, "
+
 # Parameters for the test of function_constructor
 @pytest.mark.parametrize("iterative, equationP, equationT, phase_concat, expected_function",
 [

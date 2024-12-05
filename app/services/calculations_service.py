@@ -1,18 +1,46 @@
-"""
-### Dynamic function constructor
+from typing import List
 
-Construct the function name used based on the input of the user.
+def phase_concatenate(phases: List[str]):
+    '''
+    ### Phase Concatenation
 
-:param iterative: Is the calculation mode iterative? Equation for both P and T must be provided. *(bool)*
-:param equationP: Equation chosen to calculate P. *(str || null)*
-:param equationT: Equation chosen to calculate T. *(str || null)*
-:param phaseConcat: Used phases used for calculations. *(str)*
+    Transform the list of phases into a string that can be injected to construct function names
 
-:return: the name of the function to call *(str)*.
-___________
-"""
+    :param phases: list of phases required by the chosen equations *(list[str])*
+    :return: a string of the phases names
+    '''
+
+    if len(phases) == 1:
+        return f"_{phases[0].lower()}_only"
+
+    return "".join([f"_{phase.lower()}" for phase in phases])
+
+def phase_arg_constructor(phases: List[str]):
+    '''
+    ### Phase argument constructor
+
+    Transform the list of phases into an argument that will be passed to the function argument_constructor
+
+    :param phases: list of phases required by the chosen equations *(list[str])*
+    :return: a string of the phases names in the form of an argument
+    '''
+
+    return "".join([f"{phase.lower()}_comps = compo_{phase.lower()}, " for phase in phases])
 
 def function_constructor(iterative, equationP, equationT, phaseConcat):
+    """
+    ### Dynamic function constructor
+
+    Construct the function name used based on the input of the user.
+
+    :param iterative: Is the calculation mode iterative? Equation for both P and T must be provided. *(bool)*
+    :param equationP: Equation chosen to calculate P. *(str || null)*
+    :param equationT: Equation chosen to calculate T. *(str || null)*
+    :param phaseConcat: Used phases used for calculations. *(str)*
+
+    :return: the name of the function to call *(str)*.
+    ___________
+    """
 
     if iterative:
 
