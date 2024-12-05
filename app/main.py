@@ -6,7 +6,7 @@ import Thermobar as TB
 
 from app.services.calculations_service import argument_constructor
 from app.utils.utils import rename_duplicate_columns
-from app.services.calculations_service import function_constructor
+from app.services.calculations_service import function_constructor, phase_concatenate, phase_arg_constructor
 from app.utils.models import calculationRequest, calculationResponse
 
 # Create an instance of the app
@@ -26,10 +26,6 @@ appCalculationThermobar.add_middleware(
 
 async def calculate(request: calculationRequest):
 
-    phaseConcat = ''
-    phasesVariableList = {}
-    phaseArg = ''
-
     userData = request
 
     # Transform the stringified json into usable dataframe ___________________________________________________
@@ -39,25 +35,12 @@ async def calculate(request: calculationRequest):
 
     userData.data = pd.DataFrame(userData.data)
 
-    print(userData)
-
-    for phase in userData.phases:
-        globals()[f'compo_{phase.lower()}'] = userData.data.filter(regex = '_' + phase)
-        phasesVariableList[f'compo_{phase.lower()}'] = f'compo_{phase.lower()}'
-
-        phaseConcat = phaseConcat + '_' + phase.lower() # used later for function name
-
-        phaseArg = phaseArg + f'{phase.lower()}_comps = compo_{phase.lower()}, ' # used later for argument construction
-
-    if len(userData.phases) == 1: # Case where there is only one phase the name of the function will be "phase_only_"
-        phaseConcat = f'_{phase(0).lower()}_only'
-
     # Creating the function name and the arguments for the different cases ___________________________________
 
     function_name = function_constructor(userData.iterative,
                                          userData.equationP,
                                          userData.equationT,
-                                         userData.phaseConcat)
+                                         phase_concatenate(userData.phases))
 
     arguments = argument_constructor(userData.iterative,
                                          userData.tDependant,
@@ -65,7 +48,7 @@ async def calculate(request: calculationRequest):
                                          userData.h2oDependant,
                                          userData.equationP,
                                          userData.equationT,
-                                         phaseArg,
+                                         phase_arg_constructor(userData.phases),
                                          userData.temperature,
                                          userData.pressure,
                                          userData.h2o)
