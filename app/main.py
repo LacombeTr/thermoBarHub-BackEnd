@@ -6,7 +6,7 @@ import Thermobar as TB
 
 from app.services.calculations_service import argument_constructor
 from app.utils.utils import rename_duplicate_columns
-from app.services.calculations_service import function_constructor
+from app.services.calculations_service import function_constructor, phase_concatenate, phase_arg_constructor
 from app.utils.models import calculationRequest, calculationResponse
 
 # Create an instance of the app
@@ -26,38 +26,21 @@ appCalculationThermobar.add_middleware(
 
 async def calculate(request: calculationRequest):
 
-    phaseConcat = ''
-    phasesVariableList = {}
-    phaseArg = ''
-
     userData = request
 
+    # print(userData.data)
     # Transform the stringified json into usable dataframe ___________________________________________________
-
-    userData.data = json.loads(userData.data)
-    userData.data = userData.data["Feuil1"]
 
     userData.data = pd.DataFrame(userData.data)
 
-    print(userData)
-
-    for phase in userData.phases:
-        globals()[f'compo_{phase.lower()}'] = userData.data.filter(regex = '_' + phase)
-        phasesVariableList[f'compo_{phase.lower()}'] = f'compo_{phase.lower()}'
-
-        phaseConcat = phaseConcat + '_' + phase.lower() # used later for function name
-
-        phaseArg = phaseArg + f'{phase.lower()}_comps = compo_{phase.lower()}, ' # used later for argument construction
-
-    if len(userData.phases) == 1: # Case where there is only one phase the name of the function will be "phase_only_"
-        phaseConcat = f'_{phase(0).lower()}_only'
+    print(userData.data)
 
     # Creating the function name and the arguments for the different cases ___________________________________
 
     function_name = function_constructor(userData.iterative,
                                          userData.equationP,
                                          userData.equationT,
-                                         userData.phaseConcat)
+                                         phase_concatenate(userData.phases))
 
     arguments = argument_constructor(userData.iterative,
                                          userData.tDependant,
@@ -65,7 +48,7 @@ async def calculate(request: calculationRequest):
                                          userData.h2oDependant,
                                          userData.equationP,
                                          userData.equationT,
-                                         phaseArg,
+                                         userData.phases,
                                          userData.temperature,
                                          userData.pressure,
                                          userData.h2o)
@@ -79,7 +62,7 @@ async def calculate(request: calculationRequest):
         print(f"The function {function_name} doesn't exist in ThermoBar")
         raise SystemExit
 
-    calculations = function_to_call(**eval(f"dict({arguments})"))
+    calculations = function_to_call(**arguments)
 
     calculations = rename_duplicate_columns(calculations) # In case of duplicate column name (in the case of CPX-OPX syem for example, two columns for the components exists for each pyroxene)
 

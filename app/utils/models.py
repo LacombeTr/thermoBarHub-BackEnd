@@ -14,7 +14,7 @@ class calculationRequest(BaseModel):
 
     phases: List[str]
     system: str
-    data: str
+    data: List[dict]
     iterative: bool
     equationP: Optional[str]
     equationT: Optional[str]

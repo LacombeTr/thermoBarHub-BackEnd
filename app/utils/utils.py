@@ -1,3 +1,5 @@
+from typing import List
+
 # Function to correct if there is duplicated column names (which case the change to a json will fail at the end of calculations)
 def rename_duplicate_columns(df):
 
