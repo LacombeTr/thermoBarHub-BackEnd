@@ -15,17 +15,19 @@ def phase_concatenate(phases: List[str]):
 
     return "".join([f"_{phase.lower()}" for phase in phases])
 
-def phase_arg_constructor(phases: List[str]):
+def phase_arg_constructor(arguments_dict, phases):
     '''
     ### Phase argument constructor
 
     Transform the list of phases into an argument that will be passed to the function argument_constructor
 
+    :param arguments_dict:
     :param phases: list of phases required by the chosen equations *(list[str])*
     :return: a string of the phases names in the form of an argument
     '''
-
-    return "".join([f"{phase.lower()}_comps = compo_{phase.lower()}, " for phase in phases])
+    for phase in phases:
+        arguments_dict[f'{phase.lower()}_comps'] = f'compos_{phase.lower()}'
+        print(arguments_dict[f'{phase.lower()}_comps'])
 
 def function_constructor(iterative, equationP, equationT, phaseConcat):
     """
@@ -89,18 +91,18 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
     ___________
     """
 
+    arguments = {"eq_tests": True} # initializing the argument dictionary with this value by default
+    phase_arg_constructor(arguments, phaseArg)
+
+    if h2oDependant:  # If the equation is water content dependant the water content argument is added
+        arguments["H2O_Liq"] = h2o
+
     if iterative:
 
         if equationP is not None and equationT is not None :
             # Construction of the arguments of the function and function call (arg)
-            eqArg = f'equationP="{equationP}", equationT="{equationT}", '
-
-            if h2oDependant:  # If the equation is water content dependant the water content argument is added
-                h2oArg = f'H2O_Liq = {h2o}, '
-            else:
-                h2oArg = ''
-
-            arguments = phaseArg + eqArg + h2oArg + 'eq_tests=True'
+            arguments["equationP"] = equationP
+            arguments["equationT"] = equationT
 
             return arguments
 
@@ -110,39 +112,19 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
 
     elif equationP is not None : # Case to calculate P
 
-        eqArg = f'equationP="{equationP}", '
+        arguments["equationP"] = f'"{equationP}"'
 
         if tDependant: # If the equation is temperature dependant the temperature argument is added
-            tempArg = f'T = {temperature}, '
-        else:
-            tempArg = ''
-
-        if h2oDependant: # If the equation is water content dependant the water content argument is added
-            h2oArg = f'H2O_Liq = {h2o}, '
-        else:
-            h2oArg = ''
-
-        # Construction of the arguments of the function and function call (arg)
-        arguments = phaseArg + eqArg + tempArg + h2oArg + 'eq_tests=True'
+            arguments["T"] = temperature
 
         return arguments
 
     elif equationT is not None : # Case to calculate T
 
-        eqArg = f'equationT="{equationT}", '
+        arguments["equationT"] = f'"{equationT}"'
 
         if pDependant: # If the equation is temperature dependant the temperature argument is added
-            pressArg = f'P = {pressure}, '
-        else:
-            pressArg = ''
-
-        if h2oDependant: # If the equation is water content dependant the water content argument is added
-            h2oArg = f'H2O_Liq = {h2o}, '
-        else:
-            h2oArg = ''
-
-        # Construction of the arguments of the function and function call (arg)
-        arguments = phaseArg + eqArg + pressArg + h2oArg + 'eq_tests=True'
+            arguments["P"] = pressure
 
         return arguments
 

@@ -28,12 +28,12 @@ async def calculate(request: calculationRequest):
 
     userData = request
 
+    # print(userData.data)
     # Transform the stringified json into usable dataframe ___________________________________________________
 
-    userData.data = json.loads(userData.data)
-    userData.data = userData.data["Feuil1"]
-
     userData.data = pd.DataFrame(userData.data)
+
+    print(userData.data)
 
     # Creating the function name and the arguments for the different cases ___________________________________
 
@@ -48,7 +48,7 @@ async def calculate(request: calculationRequest):
                                          userData.h2oDependant,
                                          userData.equationP,
                                          userData.equationT,
-                                         phase_arg_constructor(userData.phases),
+                                         userData.phases,
                                          userData.temperature,
                                          userData.pressure,
                                          userData.h2o)
@@ -62,7 +62,7 @@ async def calculate(request: calculationRequest):
         print(f"The function {function_name} doesn't exist in ThermoBar")
         raise SystemExit
 
-    calculations = function_to_call(**eval(f"dict({arguments})"))
+    calculations = function_to_call(**arguments)
 
     calculations = rename_duplicate_columns(calculations) # In case of duplicate column name (in the case of CPX-OPX syem for example, two columns for the components exists for each pyroxene)
 
