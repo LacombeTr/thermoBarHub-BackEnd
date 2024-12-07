@@ -1,5 +1,5 @@
 import pytest
-from app.services.calculations_service import *
+from app.services.thermobarometryService import *
 
 def test_phase_concatenate_single_phase_returns_phase_only():
     assert phase_concatenate(["Cpx"]) == "_cpx_only"

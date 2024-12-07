@@ -1,4 +1,11 @@
 from typing import List
+from fastapi import HTTPException
+import pandas as pd
+import Thermobar as TB
+
+from app.utils.models import calculationRequest, calculationResponse
+from app.utils.utils import rename_duplicate_columns
+
 
 def phase_concatenate(phases: List[str]):
     '''
@@ -149,3 +156,72 @@ def argument_constructor(iterative, tDependant, pDependant, h2oDependant, equati
     else :
         # if no equation is passed (SHOULD NOT HAPPEN) the system shutdown
         return "No equation passed shutting down"
+
+def calculate_thermobaro(request: calculationRequest):
+    '''
+    ### Thermobarometry calculations
+
+    Fonction used to perform thermobarometry calculations
+
+    :param request: an object composed by a set of parameter along with data for calculations
+    :return calculationResponse: calculations and parameters
+    '''
+
+    userData = request
+
+    userData.data = pd.DataFrame(userData.data)
+
+    try:
+        for phase in userData.phases:
+            selected_columns = userData.data.columns[userData.data.columns.str.contains(phase)]
+            globals()[f'compo_{phase.lower()}'] = userData.data[selected_columns]
+            print(f'compo_{phase.lower()}')
+            print(globals()[f'compo_{phase.lower()}'])
+    except:
+        raise HTTPException(status_code=422, detail="Invalid column names")
+
+    # Creating the function name and the arguments for the different cases ___________________________________
+
+    function_name = function_constructor(userData.iterative,
+                                         userData.equationP,
+                                         userData.equationT,
+                                         phase_concatenate(userData.phases))
+
+    arguments = argument_constructor(userData.iterative,
+                                         userData.tDependant,
+                                         userData.pDependant,
+                                         userData.h2oDependant,
+                                         userData.equationP,
+                                         userData.equationT,
+                                         phase_arg_constructor(userData.phases),
+                                         userData.temperature,
+                                         userData.pressure,
+                                         userData.h2o)
+
+    # Get this function using getattr (get attribute of the TB)
+    # if the function doesn't exist an error is raised and the system is shut down
+
+    try:
+        function_to_call = getattr(TB, function_name)
+    except:
+        raise HTTPException(status_code=400, detail= f"Invalid function name: {function_name}")
+
+    try:
+        calculations = function_to_call(**eval(f"dict({arguments})"))
+    except:
+        raise HTTPException(status_code=422, detail= f"Invalid function argument: { arguments }")
+
+    calculations = rename_duplicate_columns(calculations) # In case of duplicate column name (in the case of CPX-OPX syem for example, two columns for the components exists for each pyroxene)
+    calculations = calculations.to_json(orient='records', lines=False)
+
+    print(type(calculations))
+
+    return calculationResponse(
+        phases = request.phases,
+        equationP = request.equationP,
+        equationT = request.equationT,
+        pressure = request.pressure,
+        temperature = request.temperature,
+        h2o = request.h2o,
+        data=calculations
+    )
