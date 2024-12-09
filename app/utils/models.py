@@ -1,5 +1,6 @@
 # Create an object of what the application receive
-from typing import Optional, List
+import json
+from typing import Optional, List, Dict
 from pydantic import BaseModel
 
 """
@@ -7,14 +8,13 @@ The models used serialize and validate the data exchanged with the Front-End.
 """
 
 class calculationRequest(BaseModel):
-
     """
     Calculation request model correspond to what the Front-End send to the Back-End
     """
 
     phases: List[str]
     system: str
-    data: str
+    data: List[Dict]
     iterative: bool
     equationP: Optional[str]
     equationT: Optional[str]
